@@ -3,7 +3,7 @@ import { toZonedTime, formatInTimeZone } from 'date-fns-tz';
 export const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export function localDatetimeToUtcIso(value: string): string {
-  const local = new Date(`${value}:00`); // создаём локальную дату
+  const local = new Date(`${value}:00`);
   return new Date(local.getTime() - local.getTimezoneOffset() * 60000).toISOString();
 }
 

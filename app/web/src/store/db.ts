@@ -1,76 +1,97 @@
 import { openDB } from 'idb';
-import type { DBSchema } from 'idb';
 import type { Booking } from '../utils/booking';
 
-export interface RA_DB extends DBSchema {
-  rooms: { 
-    key: string; 
-    value: { id: string; name: string; capacity: number; features: string[] }; 
-    indexes: { 'by-name': string }; 
-  };
-  assets: { 
-    key: string; 
-    value: { id: string; name: string; inventoryCode: string; status: string }; 
-  };
-  bookings: { 
-    key: string; 
-    value: Booking; 
-    indexes: { 'by-resource': [string, string] }; 
-  };
+const DB_NAME = 'room-assets-db';
+const DB_VERSION = 1;
+
+export async function getDb() {
+  return openDB(DB_NAME, DB_VERSION, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains('rooms')) {
+        db.createObjectStore('rooms', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('assets')) {
+        db.createObjectStore('assets', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('bookings')) {
+        db.createObjectStore('bookings', { keyPath: 'id' });
+      }
+    },
+  });
 }
 
-type StoreName = 'rooms' | 'assets' | 'bookings';
-
-export const dbPromise = openDB<RA_DB>('room-assets-db', 1, {
-  upgrade(db) {
-    const r = db.createObjectStore('rooms', { keyPath: 'id' });
-    r.createIndex('by-name', 'name');
-
-    db.createObjectStore('assets', { keyPath: 'id' });
-
-    const b = db.createObjectStore('bookings', { keyPath: 'id' });
-    b.createIndex('by-resource', ['resourceType', 'resourceId']);
-  }
-});
-
-export async function getAll(storeName: 'rooms'): Promise<RA_DB['rooms']['value'][]>;
-export async function getAll(storeName: 'assets'): Promise<RA_DB['assets']['value'][]>;
-export async function getAll(storeName: 'bookings'): Promise<Booking[]>;
-export async function getAll(storeName: StoreName): Promise<any[]> {
-  const db = await dbPromise;
-  return db.getAll(storeName) as any;
-}
-
-export async function put<T extends StoreName>(storeName: T, value: RA_DB[T]['value']) {
-  const db = await dbPromise;
-  await db.put(storeName, value);
-}
-
-export async function bulkClearAndPut(data: {
-  rooms?: RA_DB['rooms']['value'][];
-  assets?: RA_DB['assets']['value'][];
-  bookings?: Booking[];
+export async function bulkClearAndPut(seed: {
+  rooms: any[];
+  assets: any[];
+  bookings: Booking[];
 }) {
-  const db = await dbPromise;
-  const tx = db.transaction(['rooms','assets','bookings'], 'readwrite');
+  const db = await getDb();
 
-  if (data.rooms) {
-    const store = tx.objectStore('rooms');
-    await store.clear();
-    for (const r of data.rooms) await store.put(r);
-  }
+  const tx = db.transaction(['rooms', 'assets', 'bookings'], 'readwrite');
+  await Promise.all([
+    tx.objectStore('rooms').clear(),
+    tx.objectStore('assets').clear(),
+    tx.objectStore('bookings').clear(),
+  ]);
 
-  if (data.assets) {
-    const store = tx.objectStore('assets');
-    await store.clear();
-    for (const a of data.assets) await store.put(a);
-  }
-
-  if (data.bookings) {
-    const store = tx.objectStore('bookings');
-    await store.clear();
-    for (const b of data.bookings) await store.put(b);
-  }
+  seed.rooms.forEach((r) => tx.objectStore('rooms').put(r));
+  seed.assets.forEach((a) => tx.objectStore('assets').put(a));
+  seed.bookings.forEach((b) => tx.objectStore('bookings').put(b));
 
   await tx.done;
+}
+
+export async function listBookings(): Promise<Booking[]> {
+  const db = await getDb();
+  return await db.getAll('bookings');
+}
+
+export async function createBooking(newBooking: Booking): Promise<void> {
+  const db = await getDb();
+
+  const existing = await db.getAll('bookings');
+  const overlap = existing.find(
+    (b) =>
+      b.resourceType === newBooking.resourceType &&
+      b.resourceId === newBooking.resourceId &&
+      !(newBooking.end <= b.start || newBooking.start >= b.end)
+  );
+
+  if (overlap) {
+    throw new Error('Пересечение с другой бронью!');
+  }
+
+  await db.put('bookings', newBooking);
+}
+
+export async function listRooms() {
+  const db = await getDb();
+  return await db.getAll('rooms');
+}
+
+export async function listAssets() {
+  const db = await getDb();
+  return await db.getAll('assets');
+}
+
+export async function updateBooking(updated: Booking) {
+  const db = await getDb();
+  await db.put('bookings', updated);
+}
+
+export async function deleteBooking(id: string) {
+  const db = await getDb();
+  await db.delete('bookings', id);
+}
+
+export async function exportAll() {
+  const db = await getDb();
+  const rooms = await db.getAll('rooms');
+  const assets = await db.getAll('assets');
+  const bookings = await db.getAll('bookings');
+  return { rooms, assets, bookings };
+}
+
+export async function importAll(data: any) {
+  await bulkClearAndPut(data);
 }
