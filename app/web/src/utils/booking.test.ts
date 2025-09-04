@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { hasOverlap } from './booking';
-import type { Booking } from './booking';  // <-- тип импортируем отдельно
+import type { Booking } from './booking';
 
 
 describe('hasOverlap', () => {
