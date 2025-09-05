@@ -43,72 +43,81 @@ export default function BookingForm({ existing, onSave }: Props) {
       notes,
     };
 
-    if (existing) {
-      await updateBooking(booking);
-    } else {
-      await createBooking(booking);
+    try {
+      if (existing) {
+        await updateBooking(booking);
+      } else {
+        await createBooking(booking);
+      }
+      onSave();
+    } catch (err: any) {
+      alert(`Не удалось сохранить бронь: ${err.message}`);
     }
-
-    onSave();
   };
 
   return (
-    <form onSubmit={handleSubmit} class="form">
-      <label>
-        Ресурс:
-        <select value={resourceType} onChange={(e) => setResourceType((e.target as HTMLSelectElement).value as "room" | "asset")}>
-          <option value="room">Аудитория</option>
-          <option value="asset">Инвентарь</option>
-        </select>
-      </label>
+    <div class="form-card">
+      <h3>{existing ? "Редактировать бронь" : "Новая бронь"}</h3>
+      <form onSubmit={handleSubmit} class="form-grid">
+        <label>
+          Тип ресурса
+          <select value={resourceType} onChange={(e) => setResourceType((e.target as HTMLSelectElement).value as "room" | "asset")}>
+            <option value="room">Аудитория</option>
+            <option value="asset">Инвентарь</option>
+          </select>
+        </label>
 
-      <label>
-        Выбор ресурса:
-        <select value={resourceId} onChange={(e) => setResourceId((e.target as HTMLSelectElement).value)}>
-          <option value="">-- выберите --</option>
-          {resourceType === "room" &&
-            rooms.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
-          {resourceType === "asset" &&
-            assets.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-        </select>
-      </label>
+        <label>
+          Ресурс
+          <select value={resourceId} onChange={(e) => setResourceId((e.target as HTMLSelectElement).value)}>
+            <option value="">-- выберите --</option>
+            {resourceType === "room" &&
+              rooms.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+            {resourceType === "asset" &&
+              assets.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+        </label>
 
-      <label>
-        Название:
-        <input
-          type="text"
-          value={title}
-          onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
-        />
-      </label>
+        <label>
+          Название события
+          <input
+            type="text"
+            value={title}
+            onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
+          />
+        </label>
 
-      <label>
-        Начало:
-        <input
-          type="datetime-local"
-          value={start}
-          onInput={(e) => setStart((e.target as HTMLInputElement).value)}
-        />
-      </label>
+        <label>
+          Начало
+          <input
+            type="datetime-local"
+            value={start}
+            onInput={(e) => setStart((e.target as HTMLInputElement).value)}
+          />
+        </label>
 
-      <label>
-        Конец:
-        <input
-          type="datetime-local"
-          value={end}
-          onInput={(e) => setEnd((e.target as HTMLInputElement).value)}
-        />
-      </label>
+        <label>
+          Конец
+          <input
+            type="datetime-local"
+            value={end}
+            onInput={(e) => setEnd((e.target as HTMLInputElement).value)}
+          />
+        </label>
 
-      <label>
-        Примечание:
-        <textarea
-          value={notes}
-          onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
-        />
-      </label>
+        <label>
+          Примечание
+          <textarea
+            value={notes}
+            onInput={(e) => setNotes((e.target as HTMLTextAreaElement).value)}
+          />
+        </label>
 
-      <button type="submit">Сохранить</button>
-    </form>
+        <div class="form-buttons">
+          <button type="submit">Сохранить</button>
+          <button type="button" onClick={onSave}>Отмена</button>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -1,4 +1,3 @@
-// app/web/src/utils/booking.ts
 export type Booking = {
   id: string;
   resourceType: 'room' | 'asset';

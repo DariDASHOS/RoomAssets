@@ -20,35 +20,12 @@ export async function getDb() {
   });
 }
 
-export async function bulkClearAndPut(seed: {
-  rooms: any[];
-  assets: any[];
-  bookings: Booking[];
-}) {
+export async function listRooms() { const db = await getDb(); return db.getAll('rooms'); }
+export async function listAssets() { const db = await getDb(); return db.getAll('assets'); }
+export async function listBookings(): Promise<Booking[]> { const db = await getDb(); return db.getAll('bookings'); }
+
+export async function createBooking(newBooking: Booking) {
   const db = await getDb();
-
-  const tx = db.transaction(['rooms', 'assets', 'bookings'], 'readwrite');
-  await Promise.all([
-    tx.objectStore('rooms').clear(),
-    tx.objectStore('assets').clear(),
-    tx.objectStore('bookings').clear(),
-  ]);
-
-  seed.rooms.forEach((r) => tx.objectStore('rooms').put(r));
-  seed.assets.forEach((a) => tx.objectStore('assets').put(a));
-  seed.bookings.forEach((b) => tx.objectStore('bookings').put(b));
-
-  await tx.done;
-}
-
-export async function listBookings(): Promise<Booking[]> {
-  const db = await getDb();
-  return await db.getAll('bookings');
-}
-
-export async function createBooking(newBooking: Booking): Promise<void> {
-  const db = await getDb();
-
   const existing = await db.getAll('bookings');
   const overlap = existing.find(
     (b) =>
@@ -56,22 +33,8 @@ export async function createBooking(newBooking: Booking): Promise<void> {
       b.resourceId === newBooking.resourceId &&
       !(newBooking.end <= b.start || newBooking.start >= b.end)
   );
-
-  if (overlap) {
-    throw new Error('Пересечение с другой бронью!');
-  }
-
+  if (overlap) throw new Error('Пересечение с другой бронью!');
   await db.put('bookings', newBooking);
-}
-
-export async function listRooms() {
-  const db = await getDb();
-  return await db.getAll('rooms');
-}
-
-export async function listAssets() {
-  const db = await getDb();
-  return await db.getAll('assets');
 }
 
 export async function updateBooking(updated: Booking) {
@@ -84,6 +47,20 @@ export async function deleteBooking(id: string) {
   await db.delete('bookings', id);
 }
 
+export async function bulkClearAndPut(seed: { rooms: any[]; assets: any[]; bookings: Booking[]; }) {
+  const db = await getDb();
+  const tx = db.transaction(['rooms', 'assets', 'bookings'], 'readwrite');
+  await Promise.all([
+    tx.objectStore('rooms').clear(),
+    tx.objectStore('assets').clear(),
+    tx.objectStore('bookings').clear(),
+  ]);
+  seed.rooms.forEach((r) => tx.objectStore('rooms').put(r));
+  seed.assets.forEach((a) => tx.objectStore('assets').put(a));
+  seed.bookings.forEach((b) => tx.objectStore('bookings').put(b));
+  await tx.done;
+}
+
 export async function exportAll() {
   const db = await getDb();
   const rooms = await db.getAll('rooms');
@@ -93,5 +70,12 @@ export async function exportAll() {
 }
 
 export async function importAll(data: any) {
-  await bulkClearAndPut(data);
+  if (!data || !Array.isArray(data.rooms) || !Array.isArray(data.assets) || !Array.isArray(data.bookings)) {
+    throw new Error('Неверный формат JSON: ожидаются поля rooms[], assets[], bookings[]');
+  }
+  const bookings: Booking[] = data.bookings.map((b: any) => ({
+    ...b,
+    resourceType: b.resourceType === 'room' ? 'room' : 'asset',
+  }));
+  await bulkClearAndPut({ rooms: data.rooms, assets: data.assets, bookings });
 }
