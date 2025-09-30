@@ -227,3 +227,10 @@ input[type="text"] {
 .filters button:hover {
   background: #dc2626;
 }
+
+.actions {
+  display: flex;
+  gap: 1rem;             
+  align-items: center;
+  margin: 1rem 0;       
+}
