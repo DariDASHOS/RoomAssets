@@ -179,3 +179,51 @@ textarea {
   background-color: #f44336;
   color: white;
 }
+
+input[type="text"] {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 20px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.filters input,
+.filters select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 0.2s ease;
+}
+
+.filters input:focus,
+.filters select:focus {
+  border-color: #4f46e5;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.filters button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.filters button:hover {
+  background: #dc2626;
+}
