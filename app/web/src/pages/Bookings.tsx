@@ -18,6 +18,7 @@ export default function BookingsPage() {
   const [filterResource, setFilterResource] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const refresh = async () => {
     const data = await listBookings();
@@ -70,13 +71,18 @@ export default function BookingsPage() {
   }, []);
 
   const filtered = bookings.filter((b) => {
+    const now = new Date();
+    const isFinished = new Date(b.end) < now;
+
+    if (statusFilter === "active" && isFinished) return false;
+    if (statusFilter === "finished" && !isFinished) return false;
+
     const lower = search.toLowerCase();
     if (
       lower &&
       !b.title.toLowerCase().includes(lower) &&
       !b.notes?.toLowerCase().includes(lower)
-    )
-      return false;
+    ) return false;
 
     if (filterType && b.resourceType !== filterType) return false;
 
@@ -88,6 +94,7 @@ export default function BookingsPage() {
     return true;
   });
 
+  
   return (
     <div class="container">
       <h2>Брони</h2>
@@ -120,7 +127,7 @@ export default function BookingsPage() {
         <select
           value={filterType}
           onChange={(e) =>
-            setFilterType((e.target as HTMLSelectElement).value as any)
+            setFilterType((e.target as HTMLSelectElement).value as "room" | "asset" | "")
           }
         >
           <option value="">Тип ресурса: все</option>
@@ -130,9 +137,7 @@ export default function BookingsPage() {
 
         <select
           value={filterResource}
-          onChange={(e) =>
-            setFilterResource((e.target as HTMLSelectElement).value)
-          }
+          onChange={(e) => setFilterResource((e.target as HTMLSelectElement).value)}
         >
           <option value="">Конкретный ресурс: все</option>
           {(filterType === "" || filterType === "room") &&
@@ -148,6 +153,19 @@ export default function BookingsPage() {
               </option>
             ))}
         </select>
+
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter((e.target as HTMLSelectElement).value)
+          }
+        >
+          <option value="all">Статус: все</option>
+          <option value="active">Активные</option>
+          <option value="finished">Завершённые</option>
+        </select>
+
+
 
         <input
           type="date"
@@ -165,6 +183,7 @@ export default function BookingsPage() {
             setSearch("");
             setFilterType("");
             setFilterResource("");
+            setStatusFilter("all");
             setDateFrom("");
             setDateTo("");
           }}
@@ -172,6 +191,7 @@ export default function BookingsPage() {
           Сбросить
         </button>
       </div>
+
 
       {(adding || editing) && (
         <BookingForm
@@ -186,28 +206,44 @@ export default function BookingsPage() {
 
       {filtered.length === 0 && <p>Нет броней</p>}
       <div class="bookings-list">
-        {filtered.map((b) => (
-          <div class="card" key={b.id}>
-            <h3>{b.title}</h3>
-            <p>
-              {b.resourceType === "room" ? "Аудитория" : "Инвентарь"} –{" "}
-              {getResourceName(b)}
-            </p>
-            <p>
-              {new Date(b.start).toLocaleString()} —{" "}
-              {new Date(b.end).toLocaleString()}
-            </p>
-            {b.notes && (
+        {filtered.map((b) => {
+          const now = new Date();
+          const isFinished = new Date(b.end) < now;
+          const statusText = isFinished ? "Завершена" : "Активна";
+
+          return (
+            <div class="card" key={b.id}>
+              <h3>{b.title}</h3>
               <p>
-                <i>{b.notes}</i>
+                {b.resourceType === "room" ? "Аудитория" : "Инвентарь"} –{" "}
+                {getResourceName(b)}
               </p>
-            )}
-            <div class="card-buttons">
-              <button onClick={() => setEditing(b)}>Редактировать</button>
-              <button onClick={() => handleDelete(b.id)}>Удалить</button>
+              <p>
+                {new Date(b.start).toLocaleString()} —{" "}
+                {new Date(b.end).toLocaleString()}
+              </p>
+
+              <p>
+                <b>Статус:</b>{" "}
+                <span class={`status ${isFinished ? "finished" : "active"}`}>
+                  {statusText}
+                </span>
+              </p>
+
+
+              {b.notes && (
+                <p>
+                  <i>{b.notes}</i>
+                </p>
+              )}
+
+              <div class="card-buttons">
+                <button onClick={() => setEditing(b)}>Редактировать</button>
+                <button onClick={() => handleDelete(b.id)}>Удалить</button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
