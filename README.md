@@ -13,8 +13,12 @@ RoomAssets — система бронирования ресурсов
 - npm >= 9
 
 Установка:
-git clone https://github.com/yourname/RoomAssets.git
+git clone https://github.com/DariDASHOS/RoomAssets.git
 cd RoomAssets/app/web
+npm install
+
+Переустановка зависимостей:
+rm -rf node_modules package-lock.json
 npm install
 
 Запуск:

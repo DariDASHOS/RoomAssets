@@ -196,8 +196,18 @@ input[type="text"] {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
-.filters input,
+.filters input {
+  font-family: 'Montserrat', sans-serif;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  transition: border-color 0.2s ease;
+}
+
 .filters select {
+  font-family: 'Nunito', sans-serif;
   padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
