@@ -3,7 +3,7 @@ import { useState, useEffect } from "preact/hooks";
 import BookingsPage from "./pages/Bookings";
 import ResourcesPage from "./pages/Resources";
 import { importAll } from "./store/db"; 
-import seedRaw from "../../seed/seed.example.json";
+import seedRaw from "../seed/seed.example.json";
 import type { Booking } from "./utils/booking";
 import "./styles.css";
 
