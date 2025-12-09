@@ -1,22 +1,20 @@
 import fp from 'fastify-plugin'
 import { PrismaClient } from '../generated/prisma/client.js'
-// add this import:
-import { PrismaPg } from '@prisma/adapter-pg'
 
-// Fastify augmentation omitted for brevity (keep your existing declare module ...)
+// Расширяем типизацию Fastify: после регистрации плагина у экземпляра появится свойство prisma.
+declare module 'fastify' {
+  interface FastifyInstance {
+    prisma: PrismaClient
+  }
+}
 
+// Fastify-плагин, который создаёт один экземпляр PrismaClient и подключает его ко всему приложению.
 export default fp(async (app) => {
-  // create a Postgres adapter instance that uses the DATABASE_URL from env
-  const adapter = new PrismaPg({
-    // connectionString accepts the same DATABASE_URL you already use
-    connectionString: process.env.DATABASE_URL
-  })
-
-  // pass the adapter to PrismaClient
-  const prisma = new PrismaClient({ adapter })
-
+  const prisma = new PrismaClient()
+  // decorate делает prisma доступным как app.prisma во всех маршрутах и хукax.
   app.decorate('prisma', prisma)
 
+  // Хук onClose вызывает $disconnect, когда сервер останавливается, чтобы закрыть соединение с БД.
   app.addHook('onClose', async (inst) => {
     await inst.prisma.$disconnect()
   })

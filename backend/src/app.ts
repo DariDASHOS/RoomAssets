@@ -184,44 +184,6 @@ app.delete('/api/bookings/:id', async (req, reply) => {
   // === Маршруты API ===
 
   /**
-   * GET /api/users — примеры чтения данных из базы через Prisma.
-   */
-  app.get(
-    '/api/users',
-    {
-      schema: {
-        operationId: 'listUsers',
-        tags: ['Users'],
-        summary: 'Возвращает список пользователей',
-        description: 'Получаем id и email для каждого пользователя.',
-        response: {
-          200: {
-            description: 'Список пользователей',
-            content: { 'application/json': { schema: T.Array(User) } }
-          },
-          429: {
-            description: 'Too Many Requests',
-            headers: {
-              'retry-after': {
-                schema: T.Integer({ minimum: 0, description: 'Через сколько секунд можно повторить запрос' })
-              }
-            },
-            content: { 'application/problem+json': { schema: ProblemDetails } }
-          },
-          500: {
-            description: 'Internal Server Error',
-            content: { 'application/problem+json': { schema: ProblemDetails } }
-          }
-        }
-      }
-    },
-    async (_req, _reply) => {
-      // Prisma автоматически превращает результат в Promise; Fastify вернет массив как JSON.
-      return app.prisma.user.findMany({ select: { id: true, email: true } })
-    }
-  )
-
-  /**
    * GET /api/health — health-check для мониторинга.
    * Пытаемся сделать минимальный запрос в БД. Если БД недоступна, возвращаем 503.
    */
