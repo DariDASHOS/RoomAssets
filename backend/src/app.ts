@@ -8,13 +8,7 @@ import prismaPlugin from './plugins/prisma.js'
 import { Type as T } from 'typebox'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import { ValidationProblem, ProblemDetails, User, Health } from './types.js'
-import type { PrismaClient } from './generated/prisma/client.js'
 
-declare module 'fastify' {
-  interface FastifyInstance {
-    prisma: PrismaClient
-  }
-}
 // Этот модуль собирает все настройки Fastify: плагины инфраструктуры, обработчики ошибок и маршруты API.
 
 /**
@@ -40,9 +34,7 @@ export async function buildApp() {
   await app.register(helmet)
 
   // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
-  await app.register(cors, {
-    origin: process.env.NODE_ENV === 'production' ? false : 'http://localhost:5173'
-  })
+  await app.register(cors, { origin: false })
 
   /**
    * Ограничитель количества запросов на IP.
@@ -83,8 +75,10 @@ export async function buildApp() {
       },
       servers: [{ url: 'http://localhost:3000' }],
       tags: [
-        { name: 'Users', description: 'Маршруты для управления пользователями' },
-        { name: 'System', description: 'Служебные эндпоинты' }
+        { name: 'Rooms', description: 'Маршруты для работы с комнатами' },
+        { name: 'Assets', description: 'Маршруты для работы с активами' },
+        { name: 'Bookings', description: 'Маршруты для бронирований' },
+        { name: 'System', description: 'Служебные маршруты' }
       ]
     }
   })
@@ -92,62 +86,6 @@ export async function buildApp() {
   // Плагин с PrismaClient: открывает соединение с БД и добавляет app.prisma во все маршруты.
   await app.register(prismaPlugin)
 
-  
-app.get('/api/rooms', async (_req, _reply) => {
-  return app.prisma.room.findMany()
-})
-
-app.get('/api/assets', async (_req, _reply) => {
-  return app.prisma.asset.findMany()
-})
-
-app.get('/api/bookings', async (_req, _reply) => {
-  return app.prisma.booking.findMany({ orderBy: { start: 'asc' } })
-})
-
-app.post('/api/bookings', {
-  schema: {
-    body: {
-      type: 'object',
-      required: ['resourceType','resourceId','title','start','end'],
-    }
-  }
-}, async (req, reply) => {
-  const b = req.body as any
-  const created = await app.prisma.booking.create({ data: {
-    id: b.id,
-    resourceType: b.resourceType,
-    resourceId: b.resourceId,
-    title: b.title,
-    notes: b.notes,
-    start: new Date(b.start),
-    end: new Date(b.end),
-  }})
-  reply.code(201).send(created)
-})
-
-app.put('/api/bookings/:id', async (req, reply) => {
-  const id = (req.params as any).id
-  const b = req.body as any
-  const updated = await app.prisma.booking.update({
-    where: { id },
-    data: {
-      resourceType: b.resourceType,
-      resourceId: b.resourceId,
-      title: b.title,
-      notes: b.notes,
-      start: new Date(b.start),
-      end: new Date(b.end),
-    }
-  })
-  reply.send(updated)
-})
-
-app.delete('/api/bookings/:id', async (req, reply) => {
-  const id = (req.params as any).id
-  await app.prisma.booking.delete({ where: { id } })
-  reply.code(204).send()
-})
   // === Глобальные обработчики ошибок ===
 
   /**
@@ -181,7 +119,30 @@ app.delete('/api/bookings/:id', async (req, reply) => {
     } satisfies ProblemDetails)
   })
 
-  // === Маршруты API ===
+  app.get('/', async (_req, _reply) => {
+    return {
+      message: 'Rooms API is running',
+      routes: {
+        rooms: '/api/rooms',
+        assets: '/api/assets',
+        bookings: '/api/bookings'
+      }
+    }
+  })
+
+   app.get('/api/rooms', async (_req, _reply) => {
+    return app.prisma.room.findMany()
+  })
+
+  // === Assets API ===
+  app.get('/api/assets', async (_req, _reply) => {
+    return app.prisma.asset.findMany()
+  })
+
+  // === Bookings API ===
+  app.get('/api/bookings', async (_req, _reply) => {
+    return app.prisma.booking.findMany()
+  })
 
   /**
    * GET /api/health — health-check для мониторинга.
