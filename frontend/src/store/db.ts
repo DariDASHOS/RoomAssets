@@ -4,8 +4,6 @@ const API_BASE = import.meta.env.PROD
   ? 'https://roomassets.onrender.com/api'
   : 'http://localhost:3000/api'
 
-
-
 export type Room = {
   id: string
   name: string
