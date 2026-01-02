@@ -142,3 +142,6 @@ export async function importAll(data: {
     }
   }
 }
+
+console.log('PROD:', import.meta.env.PROD)
+console.log('API_BASE:', API_BASE)
