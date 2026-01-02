@@ -1,3 +1,4 @@
+//C:\Users\Пандаша\RoomAssets\backend\src\server.ts
 import { buildApp } from './app.js'
 
 // Создаем и настраиваем экземпляр Fastify, подключая плагины и маршруты из app.ts.

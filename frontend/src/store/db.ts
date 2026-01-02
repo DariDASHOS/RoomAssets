@@ -39,7 +39,7 @@ async function request<T>(path: string, opts: RequestInit = {}): Promise<T> {
   }
 
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'omit',
+    credentials: 'same-origin',
     ...opts,
     headers: {
       ...headers,
@@ -140,6 +140,3 @@ export async function importAll(data: {
     }
   }
 }
-
-console.log('PROD:', import.meta.env.PROD)
-console.log('API_BASE:', API_BASE)

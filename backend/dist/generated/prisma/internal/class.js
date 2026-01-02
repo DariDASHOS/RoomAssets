@@ -58,7 +58,6 @@ const config = {
             "fromEnvVar": null
         },
         "config": {
-            "transpile": "true",
             "engineType": "library"
         },
         "binaryTargets": [
@@ -88,8 +87,8 @@ const config = {
             }
         }
     },
-    "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider  = \"prisma-client\"\n  output    = \"../src/generated/prisma\"\n  transpile = true\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Room {\n  id        String   @id @default(cuid())\n  name      String\n  capacity  Int\n  features  String[] @default([])\n  createdAt DateTime @default(now())\n}\n\nmodel Asset {\n  id            String   @id @default(cuid())\n  name          String\n  inventoryCode String?\n  status        String   @default(\"available\")\n  createdAt     DateTime @default(now())\n}\n\nmodel Booking {\n  id           String   @id @default(cuid())\n  resourceType String // \"room\" or \"asset\"\n  resourceId   String\n  title        String\n  notes        String?\n  start        DateTime\n  end          DateTime\n  createdAt    DateTime @default(now())\n}\n",
-    "inlineSchemaHash": "7a95f9ae4ba0bdf85df909421d20c8b7a24f2f9bf4bb759c957c7188385d59ac",
+    "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Room {\n  id        String   @id @default(cuid())\n  name      String\n  capacity  Int\n  features  String[] @default([])\n  createdAt DateTime @default(now())\n}\n\nmodel Asset {\n  id            String   @id @default(cuid())\n  name          String\n  inventoryCode String?\n  status        String   @default(\"available\")\n  createdAt     DateTime @default(now())\n}\n\nmodel Booking {\n  id           String   @id @default(cuid())\n  resourceType String // \"room\" or \"asset\"\n  resourceId   String\n  title        String\n  notes        String?\n  start        DateTime\n  end          DateTime\n  createdAt    DateTime @default(now())\n}\n",
+    "inlineSchemaHash": "1d6916189803ae79c7d119e3243778991e4243bd7e2ae332b9dd19940819379a",
     "copyEngine": true,
     "runtimeDataModel": {
         "models": {},

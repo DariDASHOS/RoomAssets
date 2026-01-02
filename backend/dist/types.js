@@ -49,12 +49,29 @@ export const ProblemDetails = T.Object({
     }))
 }, { additionalProperties: true });
 // Схема и тип пользователя, которые используются и в валидаторах, и в ответах API.
-export const User = T.Object({
-    id: T.String({ description: 'Уникальный идентификатор пользователя (UUID или аналогичный формат)' }),
-    email: T.String({
-        format: 'email',
-        description: 'Адрес электронной почты, используется как логин и для отправки уведомлений'
-    })
+export const Room = T.Object({
+    id: T.String(),
+    name: T.String(),
+    capacity: T.Integer(),
+    features: T.Array(T.String()),
+    createdAt: T.String({ format: 'date-time' })
+});
+export const Asset = T.Object({
+    id: T.String(),
+    name: T.String(),
+    inventoryCode: T.Optional(T.String()),
+    status: T.String(),
+    createdAt: T.String({ format: 'date-time' })
+});
+export const Booking = T.Object({
+    id: T.String(),
+    resourceType: T.String(),
+    resourceId: T.String(),
+    title: T.String(),
+    notes: T.Optional(T.String()),
+    start: T.String({ format: 'date-time' }),
+    end: T.String({ format: 'date-time' }),
+    createdAt: T.String({ format: 'date-time' })
 });
 // Минимальная схема для health-check запроса: позволяет внешним сервисам понять, что backend жив.
 export const Health = T.Object({

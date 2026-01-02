@@ -29,7 +29,7 @@ export async function buildApp() {
     await app.register(helmet);
     // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
     await app.register(cors, {
-        origin: true
+        origin: false
     });
     /**
      * Ограничитель количества запросов на IP.

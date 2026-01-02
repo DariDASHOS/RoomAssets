@@ -29,11 +29,33 @@ export declare const ProblemDetails: T.TObject<{
     errorsText: T.TOptional<T.TString>;
 }>;
 export type ProblemDetails = Static<typeof ProblemDetails>;
-export declare const User: T.TObject<{
+export declare const Room: T.TObject<{
     id: T.TString;
-    email: T.TString;
+    name: T.TString;
+    capacity: T.TInteger;
+    features: T.TArray<T.TString>;
+    createdAt: T.TString;
 }>;
-export type User = Static<typeof User>;
+export type Room = Static<typeof Room>;
+export declare const Asset: T.TObject<{
+    id: T.TString;
+    name: T.TString;
+    inventoryCode: T.TOptional<T.TString>;
+    status: T.TString;
+    createdAt: T.TString;
+}>;
+export type Asset = Static<typeof Asset>;
+export declare const Booking: T.TObject<{
+    id: T.TString;
+    resourceType: T.TString;
+    resourceId: T.TString;
+    title: T.TString;
+    notes: T.TOptional<T.TString>;
+    start: T.TString;
+    end: T.TString;
+    createdAt: T.TString;
+}>;
+export type Booking = Static<typeof Booking>;
 export declare const Health: T.TObject<{
     ok: T.TBoolean;
 }>;

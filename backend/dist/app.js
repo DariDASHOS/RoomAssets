@@ -1,3 +1,4 @@
+//C:\Users\Пандаша\RoomAssets\backend\src\app.ts
 import Fastify, {} from 'fastify';
 import helmet from '@fastify/helmet';
 import cors from '@fastify/cors';
@@ -6,7 +7,7 @@ import swagger from '@fastify/swagger';
 import { STATUS_CODES } from 'node:http';
 import prismaPlugin from './plugins/prisma.js';
 import { Type as T } from 'typebox';
-import { ValidationProblem, ProblemDetails, User, Health } from './types.js';
+import { ValidationProblem, ProblemDetails, Room, Asset, Booking, Health } from './types.js';
 // Этот модуль собирает все настройки Fastify: плагины инфраструктуры, обработчики ошибок и маршруты API.
 /**
  * Создает и настраивает экземпляр Fastify, готовый к запуску.
@@ -24,13 +25,11 @@ export async function buildApp() {
             return new ValidationProblem(msg, errors, dataVar);
         }
     }).withTypeProvider(); // Позволяет Fastify понимать типы TypeBox при описании схем.
-    await app.register(cors, {
-        origin: true,
-    });
     // === Инфраструктурные плагины ===
     // Helmet добавляет безопасные HTTP-заголовки (Content-Security-Policy, X-DNS-Prefetch-Control и др.).
     await app.register(helmet);
     // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
+    await app.register(cors, { origin: false });
     /**
      * Ограничитель количества запросов на IP.
      * Плагин автоматически вернет 429, а мы формируем Problem Details в errorResponseBuilder.
@@ -38,7 +37,6 @@ export async function buildApp() {
     await app.register(rateLimit, {
         max: 100, // Максимум 100 запросов
         timeWindow: '1 minute', // За одну минуту
-        allowList: (req) => req.method === 'OPTIONS',
         enableDraftSpec: true, // Добавляет стандартные RateLimit-* заголовки в ответ
         addHeaders: {
             'x-ratelimit-limit': true,
@@ -73,7 +71,7 @@ export async function buildApp() {
                 { name: 'Rooms', description: 'Маршруты для работы с комнатами' },
                 { name: 'Assets', description: 'Маршруты для работы с активами' },
                 { name: 'Bookings', description: 'Маршруты для бронирований' },
-                { name: 'System', description: 'Служебные маршруты' }
+                { name: 'System', description: 'Служебные эндпоинты' }
             ]
         }
     });
@@ -107,6 +105,10 @@ export async function buildApp() {
             instance: request.url
         });
     });
+    // === Маршруты API ===
+    /**
+     * GET /api/users — примеры чтения данных из базы через Prisma.
+     */
     app.get('/', async (_req, _reply) => {
         return {
             message: 'Rooms API is running',
@@ -117,12 +119,12 @@ export async function buildApp() {
             }
         };
     });
-    app.get('/api/rooms', async (_req, _reply) => {
-        return app.prisma.room.findMany();
-    });
     // === Assets API ===
     app.get('/api/assets', async (_req, _reply) => {
         return app.prisma.asset.findMany();
+    });
+    app.get('/api/rooms', async (_req, _reply) => {
+        return app.prisma.room.findMany();
     });
     // === Bookings API ===
     app.get('/api/bookings', async (_req, _reply) => {
