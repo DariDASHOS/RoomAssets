@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const API_BASE = import.meta.env.PROD
   ? 'https://roomassets.onrender.com/api'
-  : '/api'
+  : 'http://localhost:3000/api'
+
 
 
 export type Room = {
@@ -40,7 +41,7 @@ async function request<T>(path: string, opts: RequestInit = {}): Promise<T> {
   }
 
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'same-origin',
+    credentials: 'omit',
     ...opts,
     headers: {
       ...headers,
