@@ -29,7 +29,11 @@ export async function buildApp() {
     // Helmet добавляет безопасные HTTP-заголовки (Content-Security-Policy, X-DNS-Prefetch-Control и др.).
     await app.register(helmet);
     // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
-    await app.register(cors, { origin: true });
+    await app.register(cors, {
+        origin: '*', // Разрешаем абсолютно все origins (для теста)
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type'],
+    });
     /**
      * Ограничитель количества запросов на IP.
      * Плагин автоматически вернет 429, а мы формируем Problem Details в errorResponseBuilder.
