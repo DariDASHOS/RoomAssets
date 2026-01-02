@@ -29,7 +29,19 @@ export async function buildApp() {
     await app.register(helmet);
     // CORS ограничивает кросс-доменные запросы. Здесь полностью запрещаем их (origin: false) по умолчанию.
     await app.register(cors, {
-        origin: process.env.NODE_ENV === 'production' ? false : 'http://localhost:5173'
+        origin: (origin, cb) => {
+            const allowedOrigins = [
+                'http://localhost:5173', // Локальная разработка
+                'https://daridashos.github.io' // GitHub Pages
+            ];
+            
+            // Разрешаем, если источник в списке или если это серверный запрос (нет origin)
+            if (!origin || allowedOrigins.includes(origin)) {
+                cb(null, true);
+            } else {
+                cb(new Error("Not allowed by CORS"), false);
+            }
+        }
     });
     /**
      * Ограничитель количества запросов на IP.
