@@ -1,8 +1,6 @@
 // frontend/src/store/db.ts
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-const API_BASE = import.meta.env.PROD
-  ? 'https://roomassets.onrender.com/api'
-  : 'http://localhost:3000/api'
+const API_BASE = 'https://roomassets.onrender.com/api'
 
 export type Room = {
   id: string
