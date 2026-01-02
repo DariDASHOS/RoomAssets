@@ -24,6 +24,9 @@ export async function buildApp() {
             return new ValidationProblem(msg, errors, dataVar);
         }
     }).withTypeProvider(); // Позволяет Fastify понимать типы TypeBox при описании схем.
+    await app.register(cors, {
+        origin: true,
+    });
     // === Инфраструктурные плагины ===
     // Helmet добавляет безопасные HTTP-заголовки (Content-Security-Policy, X-DNS-Prefetch-Control и др.).
     await app.register(helmet);
@@ -35,6 +38,7 @@ export async function buildApp() {
     await app.register(rateLimit, {
         max: 100, // Максимум 100 запросов
         timeWindow: '1 minute', // За одну минуту
+        allowList: (req) => req.method === 'OPTIONS',
         enableDraftSpec: true, // Добавляет стандартные RateLimit-* заголовки в ответ
         addHeaders: {
             'x-ratelimit-limit': true,
