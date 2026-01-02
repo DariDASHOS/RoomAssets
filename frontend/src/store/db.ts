@@ -37,7 +37,7 @@ async function request<T>(path: string, opts: RequestInit = {}): Promise<T> {
   }
 
   const res = await fetch(`${API_BASE}${path}`, {
-    credentials: 'same-origin',
+    credentials: 'omit',
     ...opts,
     headers: {
       ...headers,
