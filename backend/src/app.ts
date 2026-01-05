@@ -155,6 +155,49 @@ export async function buildApp() {
     return app.prisma.booking.findMany()
   })
 
+  app.post('/api/bookings', async (request, reply) => {
+    const body = request.body as Booking
+    const booking = await app.prisma.booking.create({
+      data: {
+        id: body.id,
+        resourceType: body.resourceType,
+        resourceId: body.resourceId,
+        title: body.title,
+        notes: body.notes ?? null,
+        start: new Date(body.start),
+        end: new Date(body.end),
+      },
+    })
+    reply.code(201)
+    return booking
+  })
+
+  app.put('/api/bookings/:id', async (request, reply) => {
+    const { id } = request.params as { id: string }
+    const body = request.body as Booking
+    const booking = await app.prisma.booking.update({
+      where: { id },
+      data: {
+        resourceType: body.resourceType,
+        resourceId: body.resourceId,
+        title: body.title,
+        notes: body.notes ?? null,
+        start: new Date(body.start),
+        end: new Date(body.end),
+      },
+    })
+    return booking
+  })
+
+  app.delete('/api/bookings/:id', async (request, reply) => {
+    const { id } = request.params as { id: string }
+    await app.prisma.booking.delete({
+      where: { id },
+    })
+    reply.code(204)
+    return null
+  })
+
   /**
    * GET /api/health — health-check для мониторинга.
    * Пытаемся сделать минимальный запрос в БД. Если БД недоступна, возвращаем 503.
