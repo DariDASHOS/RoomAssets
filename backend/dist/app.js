@@ -16,6 +16,7 @@ export async function buildApp() {
     const app = Fastify({
         logger: true, // Подключаем встроенный логгер Fastify.
         trustProxy: true, // Разрешаем доверять заголовкам X-Forwarded-* от прокси/ingress.
+        ignoreTrailingSlash: true,
         /**
          * Схема валидации TypeBox -> Fastify генерирует массив ошибок.
          * Мы превращаем его в ValidationProblem, чтобы вернуть клиенту единый формат Problem Details.
